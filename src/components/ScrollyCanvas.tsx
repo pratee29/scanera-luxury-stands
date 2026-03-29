@@ -12,6 +12,11 @@ export default function ScrollyCanvas() {
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -21,6 +26,8 @@ export default function ScrollyCanvas() {
   const currentIndex = useTransform(scrollYProgress, [0, 1], [0, TOTAL_FRAMES - 1]);
 
   useEffect(() => {
+    if (!mounted) return;
+    
     const loadedImages: HTMLImageElement[] = [];
     let loadedCount = 0;
 
@@ -47,7 +54,7 @@ export default function ScrollyCanvas() {
       loadedImages.push(img);
     }
     setImages(loadedImages);
-  }, []);
+  }, [mounted]);
 
   const renderFrame = useCallback(
     (index: number) => {
@@ -87,7 +94,7 @@ export default function ScrollyCanvas() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !mounted) return;
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -101,16 +108,26 @@ export default function ScrollyCanvas() {
     resizeCanvas();
 
     return () => window.removeEventListener("resize", resizeCanvas);
-  }, [loaded, currentIndex, renderFrame]);
+  }, [loaded, currentIndex, renderFrame, mounted]);
+
+  if (!mounted) {
+    return (
+      <section id="home" className="relative">
+        <div className="relative w-full h-[500vh] bg-[#0a0a0a]">
+          <div className="sticky top-0 w-full h-screen overflow-hidden flex items-center justify-center">
+            <div className="text-white text-xl">Loading...</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="home" className="relative">
       <div ref={containerRef} className="relative w-full h-[500vh] bg-[#0a0a0a]">
         <div className="sticky top-0 w-full h-screen overflow-hidden">
-          {/* Fallback background */}
           <div className="absolute inset-0 bg-[#0a0a0a] -z-10" />
 
-          {/* Loading Indicator */}
           {!loaded && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#0a0a0a]">
               <div className="relative w-48 h-1 bg-white/10 rounded-full overflow-hidden mb-4">

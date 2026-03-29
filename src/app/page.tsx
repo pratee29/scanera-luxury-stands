@@ -1,9 +1,13 @@
-import Navigation from "@/components/Navigation";
-import ScrollyCanvas from "@/components/ScrollyCanvas";
-import Experience from "@/components/Experience";
-import Projects from "@/components/Projects";
-import EducationSkills from "@/components/EducationSkills";
-import Contact from "@/components/Contact";
+"use client";
+
+import dynamic from "next/dynamic";
+
+const Navigation = dynamic(() => import("@/components/Navigation"), { ssr: false });
+const ScrollyCanvas = dynamic(() => import("@/components/ScrollyCanvas"), { ssr: false });
+const Experience = dynamic(() => import("@/components/Experience"), { ssr: false });
+const Projects = dynamic(() => import("@/components/Projects"), { ssr: false });
+const EducationSkills = dynamic(() => import("@/components/EducationSkills"), { ssr: false });
+const Contact = dynamic(() => import("@/components/Contact"), { ssr: false });
 
 export default function Home() {
   return (

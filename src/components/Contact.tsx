@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { Mail, Phone, MessageCircle, Linkedin, Github, Twitter, Instagram, Send, MapPin } from "lucide-react";
 
 const contactLinks = [
@@ -16,49 +16,49 @@ const socialLinks = [
   { label: "Instagram", href: "https://www.instagram.com/im_prateek29/", icon: Instagram },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
+function useInView(threshold = 0.1) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
-};
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return { ref, isVisible };
+}
 
 export default function Contact() {
+  const { ref: sectionRef, isVisible: sectionVisible } = useInView();
+
   return (
     <footer
       id="contact"
+      ref={sectionRef}
       className="relative w-full bg-[#0a0a0a] py-24 md:py-32 px-6 md:px-12 lg:px-24"
     >
-      {/* Background Elements */}
       <div className="pointer-events-none absolute left-1/2 bottom-0 h-[600px] w-[800px] -translate-x-1/2 translate-y-1/2 rounded-full bg-emerald-500/5 blur-[150px]" />
 
-      {/* Top Border Gradient */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <div className="max-w-6xl mx-auto relative z-10">
-        {/* Main Content */}
         <div className="grid gap-12 lg:gap-20 lg:grid-cols-2">
-          {/* Left Column - CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
+          <div
+            className={`transition-all duration-700 ${
+              sectionVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            }`}
           >
             <div className="flex items-center gap-3 mb-6">
               <Send className="w-5 h-5 text-emerald-400" />
@@ -77,42 +77,33 @@ export default function Contact() {
               I&apos;m always excited to work on challenging projects and collaborate with great teams.
             </p>
 
-            {/* Location */}
             <div className="flex items-center gap-3 text-neutral-500 mb-8">
               <MapPin className="w-4 h-4" />
               <span className="text-sm">India | Open to Remote</span>
             </div>
 
-            {/* Primary CTA */}
-            <motion.a
+            <a
               href="mailto:pratiksindhiya3@gmail.com"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full text-black font-semibold text-lg transition-all hover:shadow-lg hover:shadow-emerald-500/25"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full text-black font-semibold text-lg transition-all hover:shadow-lg hover:shadow-emerald-500/25 hover:scale-105"
             >
               <Mail className="w-5 h-5" />
               Send me an email
-            </motion.a>
-          </motion.div>
+            </a>
+          </div>
 
-          {/* Right Column - Contact Info */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="space-y-6"
-          >
-            {/* Contact Methods */}
-            {contactLinks.map((contact) => (
-              <motion.a
+          <div className="space-y-6">
+            {contactLinks.map((contact, index) => (
+              <a
                 key={contact.label}
                 href={contact.href}
                 target={contact.href.startsWith("http") ? "_blank" : undefined}
                 rel={contact.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                variants={itemVariants}
-                whileHover={{ x: 8 }}
-                className="group flex items-center gap-5 p-5 rounded-2xl border border-white/5 bg-white/[0.02] transition-all hover:border-white/10 hover:bg-white/[0.04]"
+                className={`group flex items-center gap-5 p-5 rounded-2xl border border-white/5 bg-white/[0.02] transition-all hover:border-white/10 hover:bg-white/[0.04] hover:translate-x-2 ${
+                  sectionVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-8"
+                }`}
+                style={{ transitionDelay: `${index * 100}ms` }}
               >
                 <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border border-white/5 group-hover:border-emerald-500/30 transition-colors">
                   <contact.icon className="w-5 h-5 text-emerald-400" />
@@ -121,44 +112,41 @@ export default function Contact() {
                   <p className="text-sm text-neutral-500 mb-1">{contact.label}</p>
                   <p className="text-lg text-white font-medium">{contact.value}</p>
                 </div>
-              </motion.a>
+              </a>
             ))}
 
-            {/* Social Links */}
-            <motion.div
-              variants={itemVariants}
-              className="pt-6"
+            <div
+              className={`pt-6 transition-all duration-700 ${
+                sectionVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              }`}
+              style={{ transitionDelay: "300ms" }}
             >
               <p className="text-sm text-neutral-500 mb-4 font-mono uppercase tracking-widest">
                 Social Links
               </p>
               <div className="flex flex-wrap gap-3">
                 {socialLinks.map((social) => (
-                  <motion.a
+                  <a
                     key={social.label}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="group p-4 rounded-xl border border-white/5 bg-white/[0.02] text-neutral-400 transition-all hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-white"
+                    className="group p-4 rounded-xl border border-white/5 bg-white/[0.02] text-neutral-400 transition-all hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-white hover:scale-110 hover:-translate-y-1"
                     aria-label={social.label}
                   >
                     <social.icon className="w-5 h-5" />
-                  </motion.a>
+                  </a>
                 ))}
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
 
-        {/* Footer Bottom */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-20 pt-8 border-t border-white/5"
+        <div
+          className={`mt-20 pt-8 border-t border-white/5 transition-all duration-700 ${
+            sectionVisible ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ transitionDelay: "500ms" }}
         >
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-neutral-600">
@@ -175,7 +163,7 @@ export default function Contact() {
               {new Date().getFullYear()} All rights reserved.
             </p>
           </div>
-        </motion.div>
+        </div>
       </div>
     </footer>
   );

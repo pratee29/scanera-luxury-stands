@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Briefcase, Calendar } from "lucide-react";
 
 const roles = [
@@ -34,49 +34,49 @@ const roles = [
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-    },
-  },
-};
+function useInView(threshold = 0.1) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
-};
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return { ref, isVisible };
+}
 
 export default function Experience() {
+  const { ref: sectionRef, isVisible: sectionVisible } = useInView();
+
   return (
     <section
       id="experience"
+      ref={sectionRef}
       className="relative w-full bg-[#0a0a0a] py-24 md:py-32 px-6 md:px-12 lg:px-24"
     >
-      {/* Background Elements */}
       <div className="pointer-events-none absolute left-0 top-1/4 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-emerald-500/5 blur-[150px]" />
       <div className="pointer-events-none absolute right-0 bottom-1/4 h-[400px] w-[400px] translate-x-1/2 rounded-full bg-cyan-500/5 blur-[120px]" />
 
-      {/* Top Border Gradient */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <div className="max-w-6xl mx-auto relative z-10">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="mb-16 md:mb-20"
+        <div
+          className={`mb-16 md:mb-20 transition-all duration-700 ${
+            sectionVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
         >
           <div className="flex items-center gap-3 mb-4">
             <Briefcase className="w-5 h-5 text-emerald-400" />
@@ -91,32 +91,26 @@ export default function Experience() {
           <p className="mt-4 text-neutral-400 text-lg max-w-2xl">
             Professional experience building production-ready applications at scale
           </p>
-        </motion.div>
+        </div>
 
-        {/* Experience Cards */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="flex flex-col gap-8"
-        >
+        <div className="flex flex-col gap-8">
           {roles.map((job, index) => (
-            <motion.article
+            <article
               key={job.company}
-              variants={itemVariants}
-              className="group relative rounded-2xl md:rounded-3xl border border-white/5 bg-white/[0.02] p-6 md:p-8 lg:p-10 backdrop-blur-sm transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04]"
+              className={`group relative rounded-2xl md:rounded-3xl border border-white/5 bg-white/[0.02] p-6 md:p-8 lg:p-10 backdrop-blur-sm transition-all duration-500 hover:border-white/10 hover:bg-white/[0.04] ${
+                sectionVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-12"
+              }`}
+              style={{ transitionDelay: `${index * 150}ms` }}
             >
-              {/* Card Glow Effect */}
               <div className="absolute inset-0 rounded-2xl md:rounded-3xl bg-gradient-to-br from-emerald-500/5 via-transparent to-cyan-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-              {/* Index Badge */}
               <div className="absolute -top-3 -left-3 md:-top-4 md:-left-4 w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-black font-bold text-lg shadow-lg shadow-emerald-500/25">
                 {String(index + 1).padStart(2, "0")}
               </div>
 
               <div className="relative z-10">
-                {/* Header */}
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between mb-6">
                   <div className="pt-4 md:pt-2">
                     <h3 className="text-xl md:text-2xl lg:text-3xl font-semibold text-white group-hover:text-emerald-300 transition-colors">
@@ -129,7 +123,6 @@ export default function Experience() {
                     </div>
                   </div>
 
-                  {/* Live Links */}
                   <div className="flex flex-wrap gap-2">
                     {Array.isArray(job.live) ? (
                       job.live.map((url, i) => (
@@ -158,7 +151,6 @@ export default function Experience() {
                   </div>
                 </div>
 
-                {/* Highlights */}
                 <ul className="space-y-3 mb-8">
                   {job.highlights.map((line) => (
                     <li key={line} className="flex gap-3 text-neutral-400 leading-relaxed">
@@ -168,7 +160,6 @@ export default function Experience() {
                   ))}
                 </ul>
 
-                {/* Tech Stack */}
                 <div className="pt-6 border-t border-white/5">
                   <div className="flex flex-wrap gap-2">
                     {job.tech.map((tech) => (
@@ -182,9 +173,9 @@ export default function Experience() {
                   </div>
                 </div>
               </div>
-            </motion.article>
+            </article>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

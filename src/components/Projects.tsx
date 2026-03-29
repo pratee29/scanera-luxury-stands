@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ExternalLink, Github, Layers } from "lucide-react";
 
@@ -82,52 +82,51 @@ const projects: Project[] = [
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-    },
-  },
-};
+function useInView(threshold = 0.1) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
-};
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return { ref, isVisible };
+}
 
 export default function Projects() {
+  const { ref: sectionRef, isVisible: sectionVisible } = useInView();
   const featuredProjects = projects.filter((p) => p.featured);
   const otherProjects = projects.filter((p) => !p.featured);
 
   return (
     <section
       id="projects"
+      ref={sectionRef}
       className="relative w-full bg-[#0a0a0a] py-24 md:py-32 px-6 md:px-12 lg:px-24"
     >
-      {/* Background Elements */}
       <div className="pointer-events-none absolute right-0 top-1/4 h-[600px] w-[600px] translate-x-1/3 rounded-full bg-emerald-500/5 blur-[150px]" />
       <div className="pointer-events-none absolute left-0 bottom-1/4 h-[500px] w-[500px] -translate-x-1/3 rounded-full bg-blue-500/5 blur-[120px]" />
 
-      {/* Top Border Gradient */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="mb-16 md:mb-20"
+        <div
+          className={`mb-16 md:mb-20 transition-all duration-700 ${
+            sectionVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
         >
           <div className="flex items-center gap-3 mb-4">
             <Layers className="w-5 h-5 text-emerald-400" />
@@ -142,28 +141,23 @@ export default function Projects() {
           <p className="mt-4 text-neutral-400 text-lg max-w-2xl">
             A selection of projects I&apos;ve built, from full-stack web applications to machine learning experiments
           </p>
-        </motion.div>
+        </div>
 
-        {/* Featured Projects - Large Cards */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-12"
-        >
-          {featuredProjects.map((project) => (
-            <motion.article
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-12">
+          {featuredProjects.map((project, index) => (
+            <article
               key={project.id}
-              variants={itemVariants}
-              className="group relative flex flex-col overflow-hidden rounded-2xl md:rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-white/10 hover:bg-white/[0.04]"
+              className={`group relative flex flex-col overflow-hidden rounded-2xl md:rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-white/10 hover:bg-white/[0.04] ${
+                sectionVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-12"
+              }`}
+              style={{ transitionDelay: `${index * 100}ms` }}
             >
-              {/* Featured Badge */}
               <div className="absolute top-4 left-4 z-20 px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-xs font-semibold text-black">
                 Featured
               </div>
 
-              {/* Image */}
               <div className="relative aspect-[16/10] w-full overflow-hidden">
                 <Image
                   src={project.image}
@@ -174,7 +168,6 @@ export default function Projects() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
 
-                {/* Year Badge & Links Overlay */}
                 <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3">
                   <span className="rounded-full border border-white/10 bg-black/50 px-3 py-1 text-xs font-mono text-white/90 backdrop-blur-md">
                     {project.year}
@@ -206,7 +199,6 @@ export default function Projects() {
                 </div>
               </div>
 
-              {/* Content */}
               <div className="relative z-10 flex flex-1 flex-col justify-between p-6 md:p-8">
                 <div>
                   <h3 className="text-2xl md:text-3xl font-semibold text-white mb-3 group-hover:text-emerald-300 transition-colors">
@@ -228,25 +220,21 @@ export default function Projects() {
                   ))}
                 </div>
               </div>
-            </motion.article>
+            </article>
           ))}
-        </motion.div>
+        </div>
 
-        {/* Other Projects - Smaller Cards */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {otherProjects.map((project) => (
-            <motion.article
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {otherProjects.map((project, index) => (
+            <article
               key={project.id}
-              variants={itemVariants}
-              className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-white/10 hover:bg-white/[0.04]"
+              className={`group relative flex flex-col overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-white/10 hover:bg-white/[0.04] ${
+                sectionVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-12"
+              }`}
+              style={{ transitionDelay: `${(featuredProjects.length + index) * 100}ms` }}
             >
-              {/* Image */}
               <div className="relative aspect-[16/10] w-full overflow-hidden">
                 <Image
                   src={project.image}
@@ -274,7 +262,6 @@ export default function Projects() {
                 </div>
               </div>
 
-              {/* Content */}
               <div className="flex flex-1 flex-col p-5">
                 <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-emerald-300 transition-colors">
                   {project.name}
@@ -293,9 +280,9 @@ export default function Projects() {
                   ))}
                 </div>
               </div>
-            </motion.article>
+            </article>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

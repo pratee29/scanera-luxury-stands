@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { RefObject } from "react";
+import { useScroll, useTransform, motion } from "framer-motion";
+import { RefObject, useEffect, useState } from "react";
 import { ArrowDown, Github, Linkedin, Twitter } from "lucide-react";
 
 interface OverlayProps {
@@ -15,32 +15,35 @@ const socialLinks = [
 ];
 
 export default function Overlay({ containerRef }: OverlayProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  // Section 1: Hero - 0% -> 20%
   const opacity1 = useTransform(scrollYProgress, [0, 0.15, 0.2], [1, 1, 0]);
   const y1 = useTransform(scrollYProgress, [0, 0.15, 0.2], [0, 0, -150]);
   const scale1 = useTransform(scrollYProgress, [0, 0.15, 0.2], [1, 1, 0.9]);
 
-  // Section 2: What I Do - 25% -> 50%
   const opacity2 = useTransform(scrollYProgress, [0.25, 0.35, 0.45, 0.55], [0, 1, 1, 0]);
   const y2 = useTransform(scrollYProgress, [0.25, 0.35, 0.45, 0.55], [100, 0, 0, -100]);
   const x2 = useTransform(scrollYProgress, [0.25, 0.35], [-50, 0]);
 
-  // Section 3: Education - 60% -> 90%
   const opacity3 = useTransform(scrollYProgress, [0.6, 0.7, 0.8, 0.9], [0, 1, 1, 0]);
   const y3 = useTransform(scrollYProgress, [0.6, 0.7, 0.8, 0.9], [100, 0, 0, -100]);
   const x3 = useTransform(scrollYProgress, [0.6, 0.7], [50, 0]);
 
-  // Scroll indicator
   const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
+
+  if (!mounted) return null;
 
   return (
     <div className="absolute inset-0 pointer-events-none z-10">
-      {/* Ambient Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
           style={{ opacity: opacity1 }}
@@ -52,62 +55,31 @@ export default function Overlay({ containerRef }: OverlayProps) {
         />
       </div>
 
-      {/* Section 1: Hero */}
       <motion.div
         style={{ opacity: opacity1, y: y1, scale: scale1 }}
         className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
       >
-        {/* Greeting */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-          className="mb-6"
-        >
+        <div className="mb-6">
           <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-sm text-neutral-400">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             Available for opportunities
           </span>
-        </motion.div>
+        </div>
 
-        {/* Name */}
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.8 }}
-          className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tighter text-white"
-        >
+        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tighter text-white">
           Pratik
           <span className="text-gradient">.</span>
-        </motion.h1>
+        </h1>
 
-        {/* Title */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.8 }}
-          className="mt-6 text-lg sm:text-xl md:text-2xl text-neutral-400 tracking-[0.2em] font-light uppercase"
-        >
+        <p className="mt-6 text-lg sm:text-xl md:text-2xl text-neutral-400 tracking-[0.2em] font-light uppercase">
           Full Stack Developer
-        </motion.p>
+        </p>
 
-        {/* Tagline */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.1, duration: 0.8 }}
-          className="mt-4 max-w-md text-base text-neutral-500 leading-relaxed"
-        >
+        <p className="mt-4 max-w-md text-base text-neutral-500 leading-relaxed">
           Building production-ready web applications with React, Node.js, and modern technologies
-        </motion.p>
+        </p>
 
-        {/* Social Links */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.3, duration: 0.8 }}
-          className="mt-8 flex items-center gap-4 pointer-events-auto"
-        >
+        <div className="mt-8 flex items-center gap-4 pointer-events-auto">
           {socialLinks.map((social) => (
             <a
               key={social.label}
@@ -120,32 +92,26 @@ export default function Overlay({ containerRef }: OverlayProps) {
               <social.icon className="w-5 h-5" />
             </a>
           ))}
-        </motion.div>
+        </div>
 
-        {/* Scroll Indicator */}
         <motion.div
           style={{ opacity: scrollIndicatorOpacity }}
           className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
         >
           <span className="text-xs text-neutral-500 tracking-widest uppercase">Scroll to explore</span>
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-            className="p-2 rounded-full border border-white/10"
-          >
+          <div className="p-2 rounded-full border border-white/10 animate-bounce">
             <ArrowDown className="w-4 h-4 text-neutral-400" />
-          </motion.div>
+          </div>
         </motion.div>
       </motion.div>
 
-      {/* Section 2: What I Do */}
       <motion.div
         style={{ opacity: opacity2, y: y2, x: x2 }}
         className="absolute left-6 sm:left-12 md:left-24 top-1/2 -translate-y-1/2 text-left max-w-2xl"
       >
-        <motion.span className="inline-block px-3 py-1.5 mb-6 text-xs font-mono tracking-widest text-emerald-400 uppercase border border-emerald-500/20 rounded-full bg-emerald-500/5">
+        <span className="inline-block px-3 py-1.5 mb-6 text-xs font-mono tracking-widest text-emerald-400 uppercase border border-emerald-500/20 rounded-full bg-emerald-500/5">
           01 / What I Do
-        </motion.span>
+        </span>
         <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1]">
           I ship{" "}
           <span className="text-gradient">
@@ -171,14 +137,13 @@ export default function Overlay({ containerRef }: OverlayProps) {
         </div>
       </motion.div>
 
-      {/* Section 3: Education */}
       <motion.div
         style={{ opacity: opacity3, y: y3, x: x3 }}
         className="absolute right-6 sm:right-12 md:right-24 top-1/2 -translate-y-1/2 text-right max-w-2xl flex flex-col items-end"
       >
-        <motion.span className="inline-block px-3 py-1.5 mb-6 text-xs font-mono tracking-widest text-cyan-400 uppercase border border-cyan-500/20 rounded-full bg-cyan-500/5">
+        <span className="inline-block px-3 py-1.5 mb-6 text-xs font-mono tracking-widest text-cyan-400 uppercase border border-cyan-500/20 rounded-full bg-cyan-500/5">
           02 / Background
-        </motion.span>
+        </span>
         <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1]">
           CS @{" "}
           <span className="bg-gradient-to-l from-cyan-400 to-blue-500 bg-clip-text text-transparent">

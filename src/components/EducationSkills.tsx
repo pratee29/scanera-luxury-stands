@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { GraduationCap, Code2, Wrench, Database, Globe, CreditCard, Brain, Settings } from "lucide-react";
 
 const skillGroups = [
@@ -56,49 +56,49 @@ const skillGroups = [
 
 const fundamentals = ["Data Structures & Algorithms", "Object-Oriented Programming", "Database Management", "Operating Systems", "Computer Networks"];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
+function useInView(threshold = 0.1) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
-};
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return { ref, isVisible };
+}
 
 export default function EducationSkills() {
+  const { ref: sectionRef, isVisible: sectionVisible } = useInView();
+
   return (
     <section
       id="skills"
+      ref={sectionRef}
       className="relative w-full bg-[#080808] py-24 md:py-32 px-6 md:px-12 lg:px-24"
     >
-      {/* Background Elements */}
       <div className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/5 blur-[150px]" />
 
-      {/* Top Border Gradient */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid gap-16 lg:gap-24 lg:grid-cols-[1fr,2fr]">
-          {/* Education Column */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-            className="lg:sticky lg:top-32 lg:self-start"
+          <div
+            className={`lg:sticky lg:top-32 lg:self-start transition-all duration-700 ${
+              sectionVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
+            }`}
           >
             <div className="flex items-center gap-3 mb-6">
               <GraduationCap className="w-5 h-5 text-emerald-400" />
@@ -126,33 +126,28 @@ export default function EducationSkills() {
               </div>
             </div>
 
-            {/* Fundamentals */}
             <div className="mt-10">
               <h3 className="text-sm font-mono uppercase tracking-widest text-neutral-500 mb-4">
                 Core Fundamentals
               </h3>
               <div className="flex flex-wrap gap-2">
                 {fundamentals.map((item) => (
-                  <motion.span
+                  <span
                     key={item}
-                    whileHover={{ scale: 1.05 }}
                     className="px-3 py-1.5 rounded-lg border border-white/5 bg-white/[0.02] text-sm text-neutral-400 hover:border-emerald-500/30 hover:text-white transition-all cursor-default"
                   >
                     {item}
-                  </motion.span>
+                  </span>
                 ))}
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Skills Grid */}
           <div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6 }}
-              className="mb-10"
+            <div
+              className={`mb-10 transition-all duration-700 ${
+                sectionVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              }`}
             >
               <div className="flex items-center gap-3 mb-4">
                 <Code2 className="w-5 h-5 text-emerald-400" />
@@ -163,22 +158,19 @@ export default function EducationSkills() {
               <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white">
                 Technical <span className="text-gradient">Toolkit</span>
               </h2>
-            </motion.div>
+            </div>
 
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-            >
-              {skillGroups.map((group) => (
-                <motion.div
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {skillGroups.map((group, index) => (
+                <div
                   key={group.title}
-                  variants={itemVariants}
-                  className="group relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 transition-all duration-300 hover:border-white/10 hover:bg-white/[0.04]"
+                  className={`group relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 transition-all duration-300 hover:border-white/10 hover:bg-white/[0.04] ${
+                    sectionVisible
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-8"
+                  }`}
+                  style={{ transitionDelay: `${index * 50}ms` }}
                 >
-                  {/* Hover Glow */}
                   <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${group.color} opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-5`} />
 
                   <div className="relative z-10">
@@ -202,9 +194,9 @@ export default function EducationSkills() {
                       ))}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
