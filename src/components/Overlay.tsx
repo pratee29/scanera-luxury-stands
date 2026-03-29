@@ -2,82 +2,205 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { RefObject } from "react";
+import { ArrowDown, Github, Linkedin, Twitter } from "lucide-react";
 
 interface OverlayProps {
   containerRef: RefObject<HTMLDivElement | null>;
 }
 
+const socialLinks = [
+  { icon: Github, href: "https://github.com/pratiksindhiya", label: "GitHub" },
+  { icon: Linkedin, href: "https://linkedin.com/in/pratiksindhiya", label: "LinkedIn" },
+  { icon: Twitter, href: "https://x.com/PrateekSindhiya", label: "Twitter" },
+];
+
 export default function Overlay({ containerRef }: OverlayProps) {
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end end"]
+    offset: ["start start", "end end"],
   });
 
-  // Section 1: 0% -> 15% (Opacities and transforms mapped to 0 -> 1 progress)
-  const opacity1 = useTransform(scrollYProgress, [0, 0.1, 0.15], [1, 1, 0]);
-  const y1 = useTransform(scrollYProgress, [0, 0.1, 0.15], [0, -20, -100]);
-  const scale1 = useTransform(scrollYProgress, [0, 0.1, 0.15], [1, 1.05, 1.1]);
+  // Section 1: Hero - 0% -> 20%
+  const opacity1 = useTransform(scrollYProgress, [0, 0.15, 0.2], [1, 1, 0]);
+  const y1 = useTransform(scrollYProgress, [0, 0.15, 0.2], [0, 0, -150]);
+  const scale1 = useTransform(scrollYProgress, [0, 0.15, 0.2], [1, 1, 0.9]);
 
-  // Section 2: 25% -> 45% -> 55%
+  // Section 2: What I Do - 25% -> 50%
   const opacity2 = useTransform(scrollYProgress, [0.25, 0.35, 0.45, 0.55], [0, 1, 1, 0]);
-  const y2 = useTransform(scrollYProgress, [0.25, 0.35, 0.45, 0.55], [100, 0, -20, -100]);
+  const y2 = useTransform(scrollYProgress, [0.25, 0.35, 0.45, 0.55], [100, 0, 0, -100]);
+  const x2 = useTransform(scrollYProgress, [0.25, 0.35], [-50, 0]);
 
-  // Section 3: 65% -> 85% -> 95%
-  const opacity3 = useTransform(scrollYProgress, [0.65, 0.75, 0.85, 0.95], [0, 1, 1, 0]);
-  const y3 = useTransform(scrollYProgress, [0.65, 0.75, 0.85, 0.95], [100, 0, -20, -100]);
+  // Section 3: Education - 60% -> 90%
+  const opacity3 = useTransform(scrollYProgress, [0.6, 0.7, 0.8, 0.9], [0, 1, 1, 0]);
+  const y3 = useTransform(scrollYProgress, [0.6, 0.7, 0.8, 0.9], [100, 0, 0, -100]);
+  const x3 = useTransform(scrollYProgress, [0.6, 0.7], [50, 0]);
+
+  // Scroll indicator
+  const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
 
   return (
-    <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-center">
-      
-      {/* Section 1 */}
-      <motion.div 
-        style={{ opacity: opacity1, y: y1, scale: scale1 }} 
-        className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center"
+    <div className="absolute inset-0 pointer-events-none z-10">
+      {/* Ambient Background Effects */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          style={{ opacity: opacity1 }}
+          className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[150px] animate-pulse-slow"
+        />
+        <motion.div
+          style={{ opacity: opacity2 }}
+          className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[120px] animate-pulse-slow"
+        />
+      </div>
+
+      {/* Section 1: Hero */}
+      <motion.div
+        style={{ opacity: opacity1, y: y1, scale: scale1 }}
+        className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
       >
-        <h1 className="text-5xl sm:text-7xl md:text-9xl font-bold tracking-tighter text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-          Pratik.
-        </h1>
-        <p className="text-xl sm:text-2xl md:text-3xl text-neutral-400 mt-6 tracking-[0.15em] font-light uppercase">
+        {/* Greeting */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
+          className="mb-6"
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-sm text-neutral-400">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            Available for opportunities
+          </span>
+        </motion.div>
+
+        {/* Name */}
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.8 }}
+          className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tighter text-white"
+        >
+          Pratik
+          <span className="text-gradient">.</span>
+        </motion.h1>
+
+        {/* Title */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9, duration: 0.8 }}
+          className="mt-6 text-lg sm:text-xl md:text-2xl text-neutral-400 tracking-[0.2em] font-light uppercase"
+        >
           Full Stack Developer
+        </motion.p>
+
+        {/* Tagline */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.1, duration: 0.8 }}
+          className="mt-4 max-w-md text-base text-neutral-500 leading-relaxed"
+        >
+          Building production-ready web applications with React, Node.js, and modern technologies
+        </motion.p>
+
+        {/* Social Links */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.3, duration: 0.8 }}
+          className="mt-8 flex items-center gap-4 pointer-events-auto"
+        >
+          {socialLinks.map((social) => (
+            <a
+              key={social.label}
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3 rounded-full border border-white/10 bg-white/5 text-neutral-400 transition-all duration-300 hover:text-white hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:scale-110"
+              aria-label={social.label}
+            >
+              <social.icon className="w-5 h-5" />
+            </a>
+          ))}
+        </motion.div>
+
+        {/* Scroll Indicator */}
+        <motion.div
+          style={{ opacity: scrollIndicatorOpacity }}
+          className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
+        >
+          <span className="text-xs text-neutral-500 tracking-widest uppercase">Scroll to explore</span>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+            className="p-2 rounded-full border border-white/10"
+          >
+            <ArrowDown className="w-4 h-4 text-neutral-400" />
+          </motion.div>
+        </motion.div>
+      </motion.div>
+
+      {/* Section 2: What I Do */}
+      <motion.div
+        style={{ opacity: opacity2, y: y2, x: x2 }}
+        className="absolute left-6 sm:left-12 md:left-24 top-1/2 -translate-y-1/2 text-left max-w-2xl"
+      >
+        <motion.span className="inline-block px-3 py-1.5 mb-6 text-xs font-mono tracking-widest text-emerald-400 uppercase border border-emerald-500/20 rounded-full bg-emerald-500/5">
+          01 / What I Do
+        </motion.span>
+        <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1]">
+          I ship{" "}
+          <span className="text-gradient">
+            end-to-end
+          </span>
+          <br />
+          products.
+        </h2>
+        <p className="mt-6 text-base sm:text-lg md:text-xl text-neutral-400 font-light leading-relaxed max-w-lg">
+          From realtime video conferencing and WebSocket systems to payment integrations, 
+          admin dashboards, and ML experiments. Building with React, Node.js, and MongoDB in production.
         </p>
-      </motion.div>
 
-      {/* Section 2 */}
-      <motion.div 
-        style={{ opacity: opacity2, y: y2 }} 
-        className="absolute left-6 sm:left-12 md:left-24 top-1/2 -translate-y-1/2 text-left"
-      >
-        <div className="flex flex-col gap-4">
-          <p className="text-neutral-500 font-mono text-sm tracking-widest uppercase mb-4 opacity-70">
-            [ 01 / WHAT I DO ]
-          </p>
-          <h2 className="text-4xl sm:text-6xl md:text-7xl font-semibold tracking-tight text-white max-w-2xl drop-shadow-md leading-tight">
-            I ship <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">end-to-end products.</span>
-          </h2>
-          <p className="text-neutral-400 text-lg sm:text-xl max-w-lg mt-4 font-light leading-relaxed">
-            From realtime video and WebSocket systems to payments, dashboards, and ML experiments — React, Node, and MongoDB in production.
-          </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          {["React", "Node.js", "MongoDB", "WebRTC", "TypeScript"].map((tech) => (
+            <span
+              key={tech}
+              className="px-3 py-1.5 text-sm text-neutral-300 border border-white/10 rounded-full bg-white/5"
+            >
+              {tech}
+            </span>
+          ))}
         </div>
       </motion.div>
 
-      {/* Section 3 */}
-      <motion.div 
-        style={{ opacity: opacity3, y: y3 }} 
-        className="absolute right-6 sm:right-12 md:right-24 top-1/2 -translate-y-1/2 text-right flex flex-col items-end"
+      {/* Section 3: Education */}
+      <motion.div
+        style={{ opacity: opacity3, y: y3, x: x3 }}
+        className="absolute right-6 sm:right-12 md:right-24 top-1/2 -translate-y-1/2 text-right max-w-2xl flex flex-col items-end"
       >
-        <div className="flex flex-col items-end gap-4 text-right">
-          <p className="text-neutral-500 font-mono text-sm tracking-widest uppercase mb-4 opacity-70">
-            [ 02 / PHILOSOPHY ]
-          </p>
-          <h2 className="text-4xl sm:text-6xl md:text-7xl font-semibold tracking-tight text-white max-w-2xl drop-shadow-md leading-tight">
-            CS @ <span className="text-transparent bg-clip-text bg-gradient-to-l from-indigo-400 to-purple-500">IIIT Vadodara.</span>
-          </h2>
-          <p className="text-neutral-400 text-lg sm:text-xl max-w-lg mt-4 font-light leading-relaxed">
-            B.Tech Computer Science (2022–2026). Focus on full-stack web, realtime systems, and practical ML.
-          </p>
+        <motion.span className="inline-block px-3 py-1.5 mb-6 text-xs font-mono tracking-widest text-cyan-400 uppercase border border-cyan-500/20 rounded-full bg-cyan-500/5">
+          02 / Background
+        </motion.span>
+        <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1]">
+          CS @{" "}
+          <span className="bg-gradient-to-l from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            IIIT Vadodara
+          </span>
+        </h2>
+        <p className="mt-6 text-base sm:text-lg md:text-xl text-neutral-400 font-light leading-relaxed max-w-lg text-right">
+          B.Tech Computer Science (2022-2026) at Indian Institute of Information Technology Vadodara.
+          Focused on full-stack development, realtime systems, and practical machine learning.
+        </p>
+
+        <div className="mt-8 flex flex-wrap justify-end gap-3">
+          {["DSA", "System Design", "DBMS", "OS", "Networking"].map((skill) => (
+            <span
+              key={skill}
+              className="px-3 py-1.5 text-sm text-neutral-300 border border-white/10 rounded-full bg-white/5"
+            >
+              {skill}
+            </span>
+          ))}
         </div>
       </motion.div>
-
     </div>
   );
 }
