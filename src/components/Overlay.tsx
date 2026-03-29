@@ -1,7 +1,8 @@
 "use client";
 
 import { useScroll, useTransform, motion } from "framer-motion";
-import { RefObject, useEffect, useState } from "react";
+import type { RefObject } from "react";
+import { useEffect, useState } from "react";
 import { ArrowDown, Github, Linkedin, Twitter } from "lucide-react";
 
 interface OverlayProps {
